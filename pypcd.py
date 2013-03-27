@@ -143,14 +143,15 @@ class PointCloud(object):
     def save(self, fname):
         save_point_cloud(self, fname)
 
-#parse_header(header)
-#metadata = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
-#metadata,data = load_point_cloud('/home/aeroscout/data/pcl_examples/office_scene.pcd')
-#metadata,data = load_point_cloud('/home/aeroscout/lidardet_workspaces/2013-03-12/laser_data_009_feat.pcd')
-#pc = load_point_cloud('/home/aeroscout/lidardet_workspaces/2013-03-26/ulb_laserdata/ulb_laserdata_0050.pcd')
-pc = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
+if __name__ == '__main__':
+    #parse_header(header)
+    #metadata = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
+    #metadata,data = load_point_cloud('/home/aeroscout/data/pcl_examples/office_scene.pcd')
+    #metadata,data = load_point_cloud('/home/aeroscout/lidardet_workspaces/2013-03-12/laser_data_009_feat.pcd')
+    #pc = load_point_cloud('/home/aeroscout/lidardet_workspaces/2013-03-26/ulb_laserdata/ulb_laserdata_0050.pcd')
+    pc = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
 
-md = pc.get_metadata()
-#print write_header()
+    md = pc.get_metadata()
+    #print write_header()
 
-save_point_cloud(pc, 'bla.pcd')
+    save_point_cloud(pc, 'bla.pcd')
