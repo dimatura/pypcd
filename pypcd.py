@@ -24,11 +24,13 @@ def parse_header(lines):
             metadata[key] = map(float, value.split())
         elif key=='data':
             metadata[key] = value
+        # TODO apparently count is not required?
+    if not 'count' in metadata:
+        metadata['count'] = [1]*len(metadata['fields'])
     return metadata
 
 def metadata_is_consistent(metadata):
     checks = []
-    # TODO apparently count is not required?
     required = ('version', 'fields', 'size', 'width', 'height', 'points', 'viewpoint', 'data')
     checks.append((lambda m: all([k in m for k in required]),
         'missing field'))
@@ -48,12 +50,6 @@ def metadata_is_consistent(metadata):
             print 'error:', msg
             ok = False
     return ok
-
-class PointCloud(object):
-    def __init__(self, metadata, data):
-        self.data = data
-        self.metadata_keys = metadata.keys()
-        self.__dict__.update(metadata)
 
 def build_dtype(metadata):
     fieldnames = []
@@ -92,22 +88,16 @@ def load_point_cloud(fname):
     pc = PointCloud(metadata, data)
     return pc
 
-header=\
-"""# .PCD v0.7 - Point Cloud Data file format
-VERSION 0.7
-FIELDS x y z rgb
-SIZE 4 4 4 4
-TYPE F F F F
-COUNT 1 1 1 1
-WIDTH 640
-HEIGHT 480
-VIEWPOINT 0 0 0 0 1 0 0
-POINTS 307200
-DATA ascii
-"""
+class PointCloud(object):
+    def __init__(self, metadata, data):
+        self.metadata_keys = metadata.keys()
+        self.__dict__.update(metadata)
+        self.data = data
+
 #parse_header(header)
 #metadata = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
 #metadata,data = load_point_cloud('/home/aeroscout/data/pcl_examples/office_scene.pcd')
 #metadata,data = load_point_cloud('/home/aeroscout/lidardet_workspaces/2013-03-12/laser_data_009_feat.pcd')
 pc = load_point_cloud('/home/aeroscout/lidardet_workspaces/2013-03-26/ulb_laserdata/ulb_laserdata_0050.pcd')
+
 
