@@ -27,7 +27,36 @@ def parse_header(lines):
         # TODO apparently count is not required?
     if not 'count' in metadata:
         metadata['count'] = [1]*len(metadata['fields'])
+    if not 'viewpoint' in metadata:
+        metadata['viewpoint'] = [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+    if not 'version' in metadata:
+        metadata['version'] = '.7'
     return metadata
+
+def write_header(metadata):
+    template ="""\
+VERSION {version}
+FIELDS {fields}
+SIZE {size}
+TYPE {type}
+COUNT {count}
+WIDTH {width}
+HEIGHT {height}
+VIEWPOINT {viewpoint}
+POINTS {points}
+DATA {data}
+"""
+    str_metadata = metadata.copy()
+    str_metadata['fields'] = ' '.join(metadata['fields'])
+    str_metadata['size'] = ' '.join(map(str, metadata['size']))
+    str_metadata['type'] = ' '.join(metadata['type'])
+    str_metadata['count'] = ' '.join(map(str, metadata['count']))
+    str_metadata['width'] = str(metadata['width'])
+    str_metadata['height'] = str(metadata['height'])
+    str_metadata['viewpoint'] = ' '.join(map(str, metadata['viewpoint']))
+    str_metadata['points'] = str(metadata['points'])
+    tmpl = template.format(**str_metadata)
+    return tmpl
 
 def metadata_is_consistent(metadata):
     checks = []
@@ -88,16 +117,40 @@ def load_point_cloud(fname):
     pc = PointCloud(metadata, data)
     return pc
 
+def save_point_cloud(pc, fname):
+    header = write_header(pc.get_metadata())
+    with open(fname, 'w') as f:
+        f.write(header)
+        # TODO what is the best fmt
+        np.savetxt(f, pc.data, fmt='%.4f')
+
 class PointCloud(object):
+
     def __init__(self, metadata, data):
         self.metadata_keys = metadata.keys()
+        # hack to avoid confusing metadata data key with data
+        self.data_ = metadata.pop('data')
         self.__dict__.update(metadata)
         self.data = data
+
+    def get_metadata(self):
+        metadata = {}
+        for k in self.metadata_keys:
+            metadata[k] = getattr(self, k)
+        metadata['data'] = self.data_
+        return metadata
+
+    def save(self, fname):
+        save_point_cloud(self, fname)
 
 #parse_header(header)
 #metadata = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
 #metadata,data = load_point_cloud('/home/aeroscout/data/pcl_examples/office_scene.pcd')
 #metadata,data = load_point_cloud('/home/aeroscout/lidardet_workspaces/2013-03-12/laser_data_009_feat.pcd')
-pc = load_point_cloud('/home/aeroscout/lidardet_workspaces/2013-03-26/ulb_laserdata/ulb_laserdata_0050.pcd')
+#pc = load_point_cloud('/home/aeroscout/lidardet_workspaces/2013-03-26/ulb_laserdata/ulb_laserdata_0050.pcd')
+pc = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
 
+md = pc.get_metadata()
+#print write_header()
 
+save_point_cloud(pc, 'bla.pcd')
