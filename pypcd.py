@@ -80,6 +80,13 @@ def metadata_is_consistent(metadata):
             ok = False
     return ok
 
+
+def pcd_type_to_numpy(pcd_type, pcd_sz):
+    typedict = {'F' : { 4:np.float32, 8:np.float64 },
+                'I' : { 1:np.int8, 2:np.int16, 4:np.int32, 8:np.int64 },
+                'U' : { 1:np.uint8 }}
+    return typedict[pcd_type][pcd_sz]
+
 def build_dtype(metadata):
     fieldnames = []
     typenames = []
@@ -87,17 +94,13 @@ def build_dtype(metadata):
             metadata['count'],
             metadata['type'],
             metadata['size']):
-        #print f, c, t, s
-        # TODO  short, 2 bytes
-        typedict = {'F' : { 4:np.float32, 8:np.float64 },
-                    'I' : { 1:np.int8, 2:np.int16, 4:np.int32, 8:np.int64 },
-                    'U' : { 1:np.uint8 }}
+        np_type = pcd_type_to_numpy(t, s)
         if c==1:
             fieldnames.append(f)
-            typenames.append(typedict[t][s])
+            typenames.append(np_type)
         else:
             fieldnames.extend(['%s_%04d'%(f,i) for i in xrange(c)])
-            typenames.extend([typedict[t][s]]*c)
+            typenames.extend([np_type]*c)
     dtype = np.dtype(zip(fieldnames, typenames))
     return dtype
 
@@ -124,8 +127,36 @@ def save_point_cloud(pc, fname):
         # TODO what is the best fmt
         np.savetxt(f, pc.data, fmt='%.4f')
 
-class PointCloud(object):
+def add_fields(pc, metadata, data):
+    # build new dtype
+    #pc.fields.extend(metadata['fields'])
+    #pc.count.extend(metadata['count'])
+    #pc.size.extend(metadata['size'])
+    #pc.type.extend(metadata['type'])
 
+    fieldnames, typenames = [], []
+    for f,c,t,s in zip(metadata['fields'],
+            metadata['count'],
+            metadata['type'],
+            metadata['size']):
+        np_type = pcd_type_to_numpy(t, s)
+        if c==1:
+            fieldnames.append(f)
+            typenames.append(np_type)
+        else:
+            fieldnames.extend(['%s_%04d'%(f,i) for i in xrange(c)])
+            typenames.extend([np_type]*c)
+    dtype = zip(fieldnames, typenames)
+    new_dtype = [(f, pc.data.dtype[f]) for f in pc.data.dtype.names]+dtype
+
+    new_data_cols = [pc.data[n] for n in pc.data.dtype.names]
+    for n in data.dtype.names:
+        new_data_cols.append(data[n])
+
+    new_data = np.rec.fromarrays(new_data_cols, new_dtype)
+    print new_data
+
+class PointCloud(object):
     def __init__(self, metadata, data):
         self.metadata_keys = metadata.keys()
         # hack to avoid confusing metadata data key with data
@@ -143,15 +174,23 @@ class PointCloud(object):
     def save(self, fname):
         save_point_cloud(self, fname)
 
-if __name__ == '__main__':
-    #parse_header(header)
-    #metadata = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
-    #metadata,data = load_point_cloud('/home/aeroscout/data/pcl_examples/office_scene.pcd')
-    #metadata,data = load_point_cloud('/home/aeroscout/lidardet_workspaces/2013-03-12/laser_data_009_feat.pcd')
-    #pc = load_point_cloud('/home/aeroscout/lidardet_workspaces/2013-03-26/ulb_laserdata/ulb_laserdata_0050.pcd')
-    pc = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
+"""
+#parse_header(header)
+#metadata = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
+#metadata,data = load_point_cloud('/home/aeroscout/data/pcl_examples/office_scene.pcd')
+#metadata,data = load_point_cloud('/home/aeroscout/lidardet_workspaces/2013-03-12/laser_data_009_feat.pcd')
+#pc = load_point_cloud('/home/aeroscout/lidardet_workspaces/2013-03-26/ulb_laserdata/ulb_laserdata_0050.pcd')
+pc = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
+md = pc.get_metadata()
+#print write_header()
+save_point_cloud(pc, 'bla.pcd')
+"""
 
-    md = pc.get_metadata()
-    #print write_header()
+pc = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
 
-    save_point_cloud(pc, 'bla.pcd')
+new_dt = [(f, pc.data.dtype[f]) for f in pc.data.dtype.fields]
+new_data = [pc.data[n] for n in pc.data.dtype.names]
+
+md = {'fields' : ['bla', 'bar'], 'count' : [1, 1], 'size' : [4, 4], 'type' : ['F', 'F']}
+d = np.rec.fromarrays( (np.random.random(len(pc.data)), np.random.random(len(pc.data))) )
+add_fields(pc, md, d)
