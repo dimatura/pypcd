@@ -1,4 +1,9 @@
 
+"""
+Read and write PCL .pcd files in python.
+dimatura@cmu.edu, 2013
+"""
+
 import re
 import pprint
 import numpy as np
@@ -25,6 +30,7 @@ def _parse_header(lines):
         elif key=='data':
             metadata[key] = value
         # TODO apparently count is not required?
+    # add some reasonable defaults
     if not 'count' in metadata:
         metadata['count'] = [1]*len(metadata['fields'])
     if not 'viewpoint' in metadata:
@@ -34,6 +40,8 @@ def _parse_header(lines):
     return metadata
 
 def _write_header(metadata):
+    """ given metadata as dictionary return a string header.
+    """
     template ="""\
 VERSION {version}
 FIELDS {fields}
@@ -59,8 +67,13 @@ DATA {data}
     return tmpl
 
 def _metadata_is_consistent(metadata):
+    """ sanity check for metadata. just some basic checks.
+    """
     checks = []
     required = ('version', 'fields', 'size', 'width', 'height', 'points', 'viewpoint', 'data')
+    for f in required:
+        if not f in metadata:
+            print '%s required'%f
     checks.append((lambda m: all([k in m for k in required]),
         'missing field'))
     checks.append((lambda m: len(m['type'])==len(m['count'])==len(m['fields']),
@@ -71,7 +84,7 @@ def _metadata_is_consistent(metadata):
         'width must be greater than 0'))
     checks.append((lambda m: m['points'] > 0,
         'points must be greater than 0'))
-    checks.append((lambda m: m['data']=='ascii',
+    checks.append((lambda m: m['data'].lower()=='ascii',
         'only ascii data supported'))
     ok = True
     for check, msg in checks:
@@ -80,15 +93,16 @@ def _metadata_is_consistent(metadata):
             ok = False
     return ok
 
-
 def _pcd_type_to_numpy(pcd_type, pcd_sz):
+    """ convert from a pcd type string and size to numpy dtype.
+    """
     typedict = {'F' : { 4:np.float32, 8:np.float64 },
                 'I' : { 1:np.int8, 2:np.int16, 4:np.int32, 8:np.int64 },
                 'U' : { 1:np.uint8 }}
     return typedict[pcd_type][pcd_sz]
 
 def _build_dtype(metadata):
-    """ buld dtype from pcl metadata
+    """ buld numpy structured array dtype from pcl metadata.
     """
     fieldnames = []
     typenames = []
@@ -111,6 +125,7 @@ def load_point_cloud(fname):
     """
     with open(fname) as f:
         header = []
+        # get header
         while True:
             ln = f.next().strip()
             header.append(ln)
@@ -129,8 +144,37 @@ def save_point_cloud(pc, fname):
     header = _write_header(pc.get_metadata())
     with open(fname, 'w') as f:
         f.write(header)
-        # TODO what is the best fmt
-        np.savetxt(f, pc.data, fmt='%.4f')
+        fmtstr = []
+        # TODO what is the best format string for numpy savetext?
+        # TODO make configurable
+        for t in pc.type:
+            if t=='F': fmtstr.append('%.6f')
+            elif t=='I': fmtstr.append('%d')
+            elif t=='U': fmtstr.append('%d')
+            else: assert ("don't know about type %s"%t)
+        np.savetxt(f, pc.data, fmt=fmtstr)
+
+def save_point_cloud_lbl(pc, fname):
+    """ save a simple (x y z label) pointcloud, ignoring all other features.
+    label is initialized to 1000, for jptview.
+    """
+    with open(fname, 'w') as f:
+        for i in xrange(pc.points):
+            x,y,z = ['%.4f'%d for d in pc.data['x'][i], pc.data['y'][i], pc.data['z'][i] ]
+            lbl = '1000'
+            f.write(' '.join((x,y,z,lbl))+'\n')
+
+def save_txt(pc, fname):
+    with open(fname, 'w') as f:
+        header = ' '.join(pc.fields)+'\n'
+        f.write(header)
+        fmtstr = []
+        for t in pc.type:
+            if t=='F': fmtstr.append('%.6f')
+            elif t=='I': fmtstr.append('%d')
+            elif t=='U': fmtstr.append('%d')
+            else: raise Exception("don't know about type %s"%t)
+        np.savetxt(f, pc.data, fmt=fmtstr)
 
 def add_fields(pc, metadata, data):
     """ builds copy of pointcloud with extra fields
@@ -180,6 +224,42 @@ def cat_point_clouds(pc1, pc2):
     pc3 = PointCloud(new_metadata, new_data)
     return pc3
 
+def make_xyz_point_cloud(xyz):
+    md = {'version':.7,
+          'fields':['x','y','z'],
+          'size':[4,4,4],
+          'type':['F','F','F'],
+          'count':[1,1,1],
+          'width':len(xyz),
+          'height':1,
+          'viewpoint':[0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+          'points':len(xyz),
+          'data':'ASCII'}
+    xyz = xyz.astype(np.float32)
+    dt = np.dtype([('x',np.float32), ('y',np.float32), ('z',np.float32)])
+    data = np.rec.fromarrays([xyz[:,0], xyz[:,1], xyz[:,2]], dtype=dt)
+    #data = np.rec.fromarrays([xyz.T], dtype=dt)
+    pc = PointCloud(md, data)
+    return pc
+
+def make_xyz_label_point_cloud(xyzl):
+    md = {'version':.7,
+          'fields':['x','y','z','label'],
+          'size':[4,4,4,4],
+          'type':['F','F','F','F'],
+          'count':[1,1,1,1],
+          'width':len(xyzl),
+          'height':1,
+          'viewpoint':[0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+          'points':len(xyzl),
+          'data':'ASCII'}
+    xyzl = xyzl.astype(np.float32)
+    dt = np.dtype([('x',np.float32), ('y',np.float32), ('z',np.float32), ('label',np.float32)])
+    data = np.rec.fromarrays([xyzl[:,0], xyzl[:,1], xyzl[:,2], xyzl[:,3]], dtype=dt)
+    pc = PointCloud(md, data)
+    return pc
+
+
 class PointCloud(object):
     def __init__(self, metadata, data):
         self.metadata_keys = metadata.keys()
@@ -206,6 +286,12 @@ class PointCloud(object):
 
     def save(self, fname):
         save_point_cloud(self, fname)
+
+    def save_txt(self, fname):
+        save_txt(self, fname)
+
+    def save_lbl(self, fname):
+        save_point_cloud_lbl(self, fname)
 
     def copy(self):
         new_data = np.copy(self.data)
