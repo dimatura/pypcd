@@ -6,6 +6,7 @@ dimatura@cmu.edu, 2013
 
 import re
 import pprint
+import copy
 import numpy as np
 
 def _parse_header(lines):
@@ -263,7 +264,7 @@ def make_xyz_label_point_cloud(xyzl):
 class PointCloud(object):
     def __init__(self, metadata, data):
         self.metadata_keys = metadata.keys()
-        # hack to avoid confusing metadata data key with data
+        # hack to avoid confusing metadata 'data' entry with actual pointcloud data
         self.data_ = metadata.pop('data')
         self.__dict__.update(metadata)
         self.data = data
@@ -273,8 +274,8 @@ class PointCloud(object):
         """ returns copy of metadata """
         metadata = {}
         for k in self.metadata_keys:
-            metadata[k] = getattr(self, k)
-        metadata['data'] = self.data_
+            metadata[k] = copy.copy(getattr(self, k))
+        metadata['data'] = copy.copy(self.data_)
         return metadata
 
     def check_sanity(self):
@@ -298,32 +299,3 @@ class PointCloud(object):
         new_metadata = self.get_metadata()
         return PointCloud(new_metadata, new_data)
 
-"""
-#_parse_header(header)
-#metadata = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
-#metadata,data = load_point_cloud('/home/aeroscout/data/pcl_examples/office_scene.pcd')
-#metadata,data = load_point_cloud('/home/aeroscout/lidardet_workspaces/2013-03-12/laser_data_009_feat.pcd')
-#pc = load_point_cloud('/home/aeroscout/lidardet_workspaces/2013-03-26/ulb_laserdata/ulb_laserdata_0050.pcd')
-pc = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
-md = pc.get_metadata()
-#print _write_header()
-save_point_cloud(pc, 'bla.pcd')
-"""
-
-"""
-pc = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
-new_dt = [(f, pc.data.dtype[f]) for f in pc.data.dtype.fields]
-new_data = [pc.data[n] for n in pc.data.dtype.names]
-md = {'fields' : ['bla', 'bar'], 'count' : [1, 1], 'size' : [4, 4], 'type' : ['F', 'F']}
-d = np.rec.fromarrays( (np.random.random(len(pc.data)), np.random.random(len(pc.data))) )
-newpc = add_fields(pc, md, d)
-"""
-
-"""
-pc = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
-pc2 = pc.copy()
-pc2.data['x'] += 0.1
-pc2.save('pc2.pcd')
-pc3 = cat_point_clouds(pc, pc2)
-pc3.save('pc3.pcd')
-"""
