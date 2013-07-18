@@ -51,10 +51,10 @@ def test2():
     pc = pypcd.load_point_cloud('test_data/partial_cup_model.pcd')
     old_md = pc.get_metadata()
     print old_md['fields']
-    new_dt = [(f, pc.data.dtype[f]) for f in pc.data.dtype.fields]
-    new_data = [pc.data[n] for n in pc.data.dtype.names]
+    new_dt = [(f, pc.pc_data.dtype[f]) for f in pc.pc_data.dtype.fields]
+    new_data = [pc.pc_data[n] for n in pc.pc_data.dtype.names]
     md = {'fields' : ['bla', 'bar'], 'count' : [1, 1], 'size' : [4, 4], 'type' : ['F', 'F']}
-    d = np.rec.fromarrays( (np.random.random(len(pc.data)), np.random.random(len(pc.data))) )
+    d = np.rec.fromarrays( (np.random.random(len(pc.pc_data)), np.random.random(len(pc.pc_data))) )
     newpc = pypcd.add_fields(pc, md, d)
 
     new_md = newpc.get_metadata()
@@ -76,7 +76,7 @@ def test2():
 #def test4():
     #pc = load_point_cloud('/home/aeroscout/data/pcl_examples/partial_cup_model.pcd')
     #pc2 = pc.copy()
-    #pc2.data['x'] += 0.1
+    #pc2.pc_data['x'] += 0.1
     #pc2.save('pc2.pcd')
     #pc3 = cat_point_clouds(pc, pc2)
     #pc3.save('pc3.pcd')

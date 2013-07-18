@@ -4,7 +4,9 @@ Read and write PCL .pcd files in python.
 dimatura@cmu.edu, 2013
 """
 
+import sys
 import re
+import pdb
 import pprint
 import copy
 import numpy as np
@@ -134,9 +136,9 @@ def load_point_cloud(fname):
                 metadata = _parse_header(header)
                 break
         dtype = _build_dtype(metadata)
-        data = np.loadtxt(f, dtype=dtype, delimiter=' ')
+        pc_data = np.loadtxt(f, dtype=dtype, delimiter=' ')
     #pprint.pprint(metadata)
-    pc = PointCloud(metadata, data)
+    pc = PointCloud(metadata, pc_data)
     return pc
 
 def save_point_cloud(pc, fname):
@@ -153,17 +155,33 @@ def save_point_cloud(pc, fname):
             elif t=='I': fmtstr.append('%d')
             elif t=='U': fmtstr.append('%d')
             else: assert ("don't know about type %s"%t)
-        np.savetxt(f, pc.data, fmt=fmtstr)
+        np.savetxt(f, pc.pc_data, fmt=fmtstr)
 
-def save_point_cloud_lbl(pc, fname):
+def save_xyz_label(pc, fname, use_default_lbl=False):
     """ save a simple (x y z label) pointcloud, ignoring all other features.
     label is initialized to 1000, for jptview.
     """
+    md = pc.get_metadata()
+    if not use_default_lbl and not 'label' in md['fields']:
+        raise Exception('label is not a field in this point cloud')
     with open(fname, 'w') as f:
         for i in xrange(pc.points):
-            x,y,z = ['%.4f'%d for d in pc.data['x'][i], pc.data['y'][i], pc.data['z'][i] ]
-            lbl = '1000'
+            x,y,z = ['%.4f'%d for d in pc.pc_data['x'][i], pc.pc_data['y'][i], pc.pc_data['z'][i] ]
+            lbl = '1000' if use_default_lbl else pc.pc_data['label'][i]
             f.write(' '.join((x,y,z,lbl))+'\n')
+
+def save_xyz_intensity_label(pc, fname, use_default_lbl=False):
+    md = pc.get_metadata()
+    if not use_default_lbl and not 'label' in md['fields']:
+        raise Exception('label is not a field in this point cloud')
+    if not 'intensity' in md['fields']:
+        raise Exception('intensity is not a field in this point cloud')
+    with open(fname, 'w') as f:
+        for i in xrange(pc.points):
+            x,y,z = ['%.4f'%d for d in pc.pc_data['x'][i], pc.pc_data['y'][i], pc.pc_data['z'][i]]
+            intensity = '%.4f'%pc.pc_data['intensity'][i]
+            lbl = '1000' if use_default_lbl else pc.pc_data['label'][i]
+            f.write(' '.join((x,y,z,intensity,lbl))+'\n')
 
 def save_txt(pc, fname):
     with open(fname, 'w') as f:
@@ -175,11 +193,24 @@ def save_txt(pc, fname):
             elif t=='I': fmtstr.append('%d')
             elif t=='U': fmtstr.append('%d')
             else: raise Exception("don't know about type %s"%t)
-        np.savetxt(f, pc.data, fmt=fmtstr)
+        np.savetxt(f, pc.pc_data, fmt=fmtstr)
 
-def add_fields(pc, metadata, data):
+def update_field(pc, field, pc_data):
+    """ updates field in-place.
+    """
+    pc.pc_data[field] = pc_data
+    return pc
+
+def add_fields(pc, metadata, pc_data):
     """ builds copy of pointcloud with extra fields
     """
+
+    if len(set(metadata['fields']).intersection(set(pc.fields))) > 0:
+        raise Exception("Fields with that name exist.")
+
+    if pc.points != len(pc_data):
+        raise Exception("Mismatch in number of points.")
+
     new_metadata = pc.get_metadata()
     new_metadata['fields'].extend(metadata['fields'])
     new_metadata['count'].extend(metadata['count'])
@@ -202,15 +233,17 @@ def add_fields(pc, metadata, data):
             typenames.extend([np_type]*c)
     dtype = zip(fieldnames, typenames)
     # new dtype. could be inferred?
-    new_dtype = [(f, pc.data.dtype[f]) for f in pc.data.dtype.names]+dtype
+    new_dtype = [(f, pc.pc_data.dtype[f]) for f in pc.pc_data.dtype.names]+dtype
 
-    # new data as list of arrays
-    new_data_cols = [pc.data[n] for n in pc.data.dtype.names]
-    for n in data.dtype.names:
-        new_data_cols.append(data[n])
-    # new data as recarray
-    new_data = np.rec.fromarrays(new_data_cols, new_dtype)
-    # new pc
+    new_data = np.empty(len(pc.pc_data), new_dtype)
+    for n in pc.pc_data.dtype.names:
+        new_data[n] = pc.pc_data[n]
+    for n,n_tmp in zip(fieldnames, pc_data.dtype.names):
+        new_data[n] = pc_data[n_tmp]
+
+    # TODO maybe just all the metadata in the dtype.
+    # TODO maybe use composite structured arrays for fields with count > 1
+
     newpc = PointCloud(new_metadata, new_data)
     return newpc
 
@@ -218,7 +251,7 @@ def cat_point_clouds(pc1, pc2):
     if len(pc1.fields)!=len(pc2.fields):
         raise ValueError("Pointclouds must have same fields")
     new_metadata = pc1.get_metadata()
-    new_data = np.concatenate((pc1.data, pc2.data))
+    new_data = np.concatenate((pc1.pc_data, pc2.pc_data))
     # TODO this only makes sense for unstructured pc?
     new_metadata['width'] = pc1.width+pc2.width
     new_metadata['points'] = pc1.points+pc2.points
@@ -238,9 +271,9 @@ def make_xyz_point_cloud(xyz):
           'data':'ASCII'}
     xyz = xyz.astype(np.float32)
     dt = np.dtype([('x',np.float32), ('y',np.float32), ('z',np.float32)])
-    data = np.rec.fromarrays([xyz[:,0], xyz[:,1], xyz[:,2]], dtype=dt)
+    pc_data = np.rec.fromarrays([xyz[:,0], xyz[:,1], xyz[:,2]], dtype=dt)
     #data = np.rec.fromarrays([xyz.T], dtype=dt)
-    pc = PointCloud(md, data)
+    pc = PointCloud(md, pc_data)
     return pc
 
 def make_xyz_label_point_cloud(xyzl):
@@ -256,18 +289,15 @@ def make_xyz_label_point_cloud(xyzl):
           'data':'ASCII'}
     xyzl = xyzl.astype(np.float32)
     dt = np.dtype([('x',np.float32), ('y',np.float32), ('z',np.float32), ('label',np.float32)])
-    data = np.rec.fromarrays([xyzl[:,0], xyzl[:,1], xyzl[:,2], xyzl[:,3]], dtype=dt)
-    pc = PointCloud(md, data)
+    pc_data = np.rec.fromarrays([xyzl[:,0], xyzl[:,1], xyzl[:,2], xyzl[:,3]], dtype=dt)
+    pc = PointCloud(md, pc_data)
     return pc
 
-
 class PointCloud(object):
-    def __init__(self, metadata, data):
+    def __init__(self, metadata, pc_data):
         self.metadata_keys = metadata.keys()
-        # hack to avoid confusing metadata 'data' entry with actual pointcloud data
-        self.data_ = metadata.pop('data')
         self.__dict__.update(metadata)
-        self.data = data
+        self.pc_data = pc_data
         self.check_sanity()
 
     def get_metadata(self):
@@ -275,15 +305,15 @@ class PointCloud(object):
         metadata = {}
         for k in self.metadata_keys:
             metadata[k] = copy.copy(getattr(self, k))
-        metadata['data'] = copy.copy(self.data_)
         return metadata
 
     def check_sanity(self):
+        #pdb.set_trace()
         md = self.get_metadata()
         assert(_metadata_is_consistent(md))
-        assert(len(self.data)==self.points)
-        if self.height==1:
-            assert(self.width==self.points)
+        #print >>sys.stderr, 'bla', self.points, len(self.pc_data), self.pc_data.shape
+        assert(len(self.pc_data)==self.points)
+        assert(self.width*self.height==self.points)
 
     def save(self, fname):
         save_point_cloud(self, fname)
@@ -291,11 +321,14 @@ class PointCloud(object):
     def save_txt(self, fname):
         save_txt(self, fname)
 
-    def save_lbl(self, fname):
-        save_point_cloud_lbl(self, fname)
+    def save_xyz_label(self, fname, **kwargs):
+        save_xyz_label(self, fname, **kwargs)
+
+    def save_xyz_intensity_label(self, fname, **kwargs):
+        save_xyz_intensity_label(self, fname, **kwargs)
 
     def copy(self):
-        new_data = np.copy(self.data)
+        new_pc_data = np.copy(self.pc_data)
         new_metadata = self.get_metadata()
-        return PointCloud(new_metadata, new_data)
+        return PointCloud(new_metadata, new_pc_data)
 
