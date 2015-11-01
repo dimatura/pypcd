@@ -17,15 +17,14 @@ import numpy as np
 import warnings
 import lzf
 
-import numpy_pc2
 
 HAS_SENSOR_MSGS = True
 try:
     from sensor_msgs.msg import PointField
     from sensor_msgs.msg import PointCloud2
+    import numpy_pc2 # needs sensor_msgs
 except ImportError:
     HAS_SENSOR_MSGS = False
-
 
 __all__ = [\
      'PointCloud',
@@ -620,6 +619,8 @@ class PointCloud(object):
         return PointCloud(new_metadata, new_pc_data)
 
     def to_msg(self):
+        if not HAS_SENSOR_MSGS:
+            raise NotImplementedError('ROS sensor_msgs not found')
         # TODO is there some metadata we want to attach?
         return numpy_pc2.array_to_pointcloud2(self.pc_data)
 
@@ -667,6 +668,8 @@ class PointCloud(object):
         """ from pointcloud2 msg
         squeeze: fix when clouds get 1 as first dim
         """
+        if not HAS_SENSOR_MSGS:
+            raise NotImplementedError('ROS sensor_msgs not found')
         md = {'version':.7,
               'fields': [],
               'size': [],

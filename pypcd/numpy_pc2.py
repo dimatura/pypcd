@@ -39,7 +39,9 @@ Functions for working with PointCloud2.
 __docformat__ = "restructuredtext en"
 
 import numpy as np
-from sensor_msgs.msg import PointCloud2, PointField
+
+from sensor_msgs.msg import PointField
+from sensor_msgs.msg import PointCloud2
 
 # prefix to the names of dummy fields we add to get byte alignment correct. this needs to not
 # clash with any actual field names
