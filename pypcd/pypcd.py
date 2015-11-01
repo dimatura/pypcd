@@ -19,8 +19,13 @@ import lzf
 
 import numpy_pc2
 
-from sensor_msgs.msg import PointField
-from sensor_msgs.msg import PointCloud2
+HAS_SENSOR_MSGS = True
+try:
+    from sensor_msgs.msg import PointField
+    from sensor_msgs.msg import PointCloud2
+except ImportError:
+    HAS_SENSOR_MSGS = False
+
 
 __all__ = [\
      'PointCloud',
@@ -49,17 +54,18 @@ __all__ = [\
      'numpy_type_to_pcd_type',
      ]
 
-pc2_pcd_type_mappings = [\
-                 (PointField.INT8, ('I', 1)),
-                 (PointField.UINT8, ('U', 1)),
-                 (PointField.INT16, ('I', 2)),
-                 (PointField.UINT16, ('U', 2)),
-                 (PointField.INT32, ('I', 4)),
-                 (PointField.UINT32, ('U', 4)),
-                 (PointField.FLOAT32, ('F', 4)),
-                 (PointField.FLOAT64, ('F', 8))]
-pc2_type_to_pcd_type = dict(pc2_pcd_type_mappings)
-pcd_type_to_pc2_type = dict((q,p) for (p,q) in pc2_pcd_type_mappings)
+if HAS_SENSOR_MSGS:
+    pc2_pcd_type_mappings = [\
+                     (PointField.INT8, ('I', 1)),
+                     (PointField.UINT8, ('U', 1)),
+                     (PointField.INT16, ('I', 2)),
+                     (PointField.UINT16, ('U', 2)),
+                     (PointField.INT32, ('I', 4)),
+                     (PointField.UINT32, ('U', 4)),
+                     (PointField.FLOAT32, ('F', 4)),
+                     (PointField.FLOAT64, ('F', 8))]
+    pc2_type_to_pcd_type = dict(pc2_pcd_type_mappings)
+    pcd_type_to_pc2_type = dict((q,p) for (p,q) in pc2_pcd_type_mappings)
 
 numpy_pcd_type_mappings = [\
                 (np.dtype('float32') , ('F', 4)),
@@ -170,8 +176,7 @@ def _metadata_is_consistent(metadata):
     return ok
 
 #def pcd_type_to_numpy(pcd_type, pcd_sz):
-#    """ convert from a pcd type string and size to numpy dtype.
-#    """
+#    """ convert from a pcd type string and size to numpy dtype."""
 #    typedict = {'F' : { 4:np.float32, 8:np.float64 },
 #                'I' : { 1:np.int8, 2:np.int16, 4:np.int32, 8:np.int64 },
 #                'U' : { 1:np.uint8, 2:np.uint16, 4:np.uint32 , 8:np.uint64 }}

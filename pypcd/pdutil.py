@@ -1,7 +1,5 @@
-
 import pandas as pd
 import pypcd
-
 
 def data_frame_to_point_cloud(df):
     """ create a PointCloud object from a dataframe.
@@ -32,4 +30,3 @@ def data_frame_to_point_cloud(df):
 def data_frame_to_message(df, stamp=None, frame_id=None):
     pc_data = df.to_records(index=False)
     return pypcd.numpy_pc2.array_to_pointcloud2(pc_data, stamp=stamp, frame_id=frame_id)
-
