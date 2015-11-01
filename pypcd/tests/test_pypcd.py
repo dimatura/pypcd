@@ -1,109 +1,170 @@
-import os.path as op
+"""
+this is just a basic sanity check, not a really legit test suite.
+"""
+
+import pytest
 import numpy as np
-import pandas as pd
-import numpy.testing as npt
-import pypcd as sb
+import os
+import shutil
+import tempfile
 
-data_path = op.join(sb.__path__[0], 'data')
+header1 ="""\
+# .PCD v0.7 - Point Cloud Data file format
+VERSION 0.7
+FIELDS x y z i
+SIZE 4 4 4 4
+TYPE F F F F
+COUNT 1 1 1 1
+WIDTH 500028
+HEIGHT 1
+VIEWPOINT 0 0 0 1 0 0 0
+POINTS 500028
+DATA binary_compressed
+"""
 
+header2 ="""\
+VERSION .7
+FIELDS x y z normal_x normal_y normal_z curvature boundary k vp_x vp_y vp_z principal_curvature_x principal_curvature_y principal_curvature_z pc1 pc2
+SIZE 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
+TYPE F F F F F F F F F F F F F F F F F
+COUNT 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+WIDTH 19812
+HEIGHT 1
+VIEWPOINT 0.0 0.0 0.0 1.0 0.0 0.0 0.0
+POINTS 19812
+DATA ascii
+"""
 
-def test_transform_data():
-    """
-    Testing the transformation of the data from raw data to functions
-    used for fitting a function.
+@pytest.fixture
+def pcd_fname():
+    import pypcd
+    return os.path.join(pypcd.__path__[0], 'test_data', 'partial_cup_model.pcd')
 
-    """
-    # We start with actual data. We test here just that reading the data in
-    # different ways ultimately generates the same arrays.
-    from matplotlib import mlab
-    ortho = mlab.csv2rec(op.join(data_path, 'ortho.csv'))
-    para = mlab.csv2rec(op.join(data_path, 'para.csv'))
-    x1, y1, n1 = sb.transform_data(ortho)
-    x2, y2, n2 = sb.transform_data(op.join(data_path, 'ortho.csv'))
-    npt.assert_equal(x1, x2)
-    npt.assert_equal(y1, y2)
-    # We can also be a bit more critical, by testing with data that we
-    # generate, and should produce a particular answer:
-    my_data = pd.DataFrame(
-        np.array([[0.1, 2], [0.1, 1], [0.2, 2], [0.2, 2], [0.3, 1],
-                  [0.3, 1]]),
-        columns=['contrast1', 'answer'])
-    my_x, my_y, my_n = sb.transform_data(my_data)
-    npt.assert_equal(my_x, np.array([0.1, 0.2, 0.3]))
-    npt.assert_equal(my_y, np.array([0.5, 0, 1.0]))
-    npt.assert_equal(my_n, np.array([2, 2, 2]))
+def test_parse_header():
+    from pypcd.pypcd import parse_header
+    lines = header1.split('\n')
+    md = parse_header(lines)
+    assert (md['version']=='0.7')
+    assert (md['fields']==['x', 'y', 'z', 'i'])
+    assert (md['size']==[4,4,4,4])
+    assert (md['type']==['F','F','F','F'])
+    assert (md['count']==[1,1,1,1])
+    assert (md['width']==500028)
+    assert (md['height']==1)
+    assert (md['viewpoint']==[0, 0, 0, 1, 0, 0, 0])
+    assert (md['points']==500028)
+    assert (md['data']=='binary_compressed')
 
-def test_cum_gauss():
-    sigma = 1
-    mu = 0
-    x = np.linspace(-1, 1, 12)
-    y = sb.cumgauss(x, mu, sigma)
-    # A basic test that the input and output have the same shape:
-    npt.assert_equal(y.shape , x.shape)
-    # The function evaluated over items symmetrical about mu should be
-    # symmetrical relative to 0 and 1:
-    npt.assert_equal(y[0], 1 - y[-1])
-    # Approximately 68% of the Gaussian distribution is in mu +/- sigma, so
-    # the value of the cumulative Gaussian at mu - sigma should be
-    # approximately equal to (1 - 0.68/2). Note the low precision!
-    npt.assert_almost_equal(y[0], (1 - 0.68) / 2, decimal=2)
+def test_from_path(pcd_fname):
+    import pypcd
+    pc = pypcd.PointCloud.from_path(pcd_fname)
 
+    fields = 'x y z normal_x normal_y normal_z curvature boundary k vp_x vp_y vp_z principal_curvature_x principal_curvature_y principal_curvature_z pc1 pc2'.split()
+    for fld1, fld2 in zip(pc.fields, fields):
+        assert(fld1==fld2)
+    assert (pc.width == 19812)
+    assert (len(pc.pc_data) == 19812)
 
-def test_opt_err_func():
-    # We define a truly silly function, that returns its input, regardless of
-    # the params:
-    def my_silly_func(x, my_first_silly_param, my_other_silly_param):
-        return x
+def test_add_fields(pcd_fname):
+    import pypcd
+    pc = pypcd.PointCloud.from_path(pcd_fname)
 
-    # The silly function takes two parameters and ignores them
-    my_params = [1, 10]
-    my_x = np.linspace(-1, 1, 12)
-    my_y = my_x
-    my_err = sb.opt_err_func(my_params, my_x, my_y, my_silly_func)
-    # Since x and y are equal, the error is zero:
-    npt.assert_equal(my_err, np.zeros(my_x.shape[0]))
+    old_md = pc.get_metadata()
+    new_dt = [(f, pc.pc_data.dtype[f]) for f in pc.pc_data.dtype.fields]
+    new_data = [pc.pc_data[n] for n in pc.pc_data.dtype.names]
+    md = {'fields' : ['bla', 'bar'], 'count' : [1, 1], 'size' : [4, 4], 'type' : ['F', 'F']}
+    d = np.rec.fromarrays( (np.random.random(len(pc.pc_data)), np.random.random(len(pc.pc_data))) )
+    newpc = pypcd.add_fields(pc, md, d)
 
-    # Let's consider a slightly less silly function, that implements a linear
-    # relationship between inputs and outputs:
-    def not_so_silly_func(x, a, b):
-        return x*a + b
+    new_md = newpc.get_metadata()
+    # print len(old_md['fields']), len(md['fields']), len(new_md['fields'])
+    # print old_md['fields'], md['fields'], new_md['fields']
+    assert( len(old_md['fields'])+len(md['fields']) == len(new_md['fields']) )
 
-    my_params = [1, 10]
-    my_x = np.linspace(-1, 1, 12)
-    # To test this, we calculate the relationship explicitely:
-    my_y = my_x * my_params[0] + my_params[1]
-    my_err = sb.opt_err_func(my_params, my_x, my_y, not_so_silly_func)
-    # Since x and y are equal, the error is zero:
-    npt.assert_equal(my_err, np.zeros(my_x.shape[0]))
+def test_path_roundtrip_ascii(pcd_fname):
+    import pypcd
+    pc = pypcd.PointCloud.from_path(pcd_fname)
+    md = pc.get_metadata()
 
+    tmp_dirname = tempfile.mkdtemp(suffix='_pypcd', prefix='tmp')
 
-def test_Model():
-    """ """
-    M = sb.Model()
-    x = np.linspace(0.1, 0.9, 22)
-    target_mu = 0.5
-    target_sigma = 1
-    target_y = sb.cumgauss(x, target_mu, target_sigma)
-    F = M.fit(x, target_y, initial=[target_mu, target_sigma])
-    npt.assert_equal(F.predict(x), target_y)
+    tmp_fname = os.path.join(tmp_dirname, 'out.pcd')
 
+    pc.save_pcd(tmp_fname, compression='ascii')
 
-def test_params_regression():
-    """
-    Test for regressions in model parameter values from provided data
-    """
+    assert(os.path.exists(tmp_fname))
 
-    model = sb.Model()
-    ortho_x, ortho_y, ortho_n = sb.transform_data(op.join(data_path,
-                                                          'ortho.csv'))
+    pc2 = pypcd.PointCloud.from_path(tmp_fname)
+    md2 = pc2.get_metadata()
+    assert( md == md2 )
 
-    para_x, para_y, para_n = sb.transform_data(op.join(data_path,
-                                                       'para.csv'))
+    np.testing.assert_equal(pc.pc_data, pc2.pc_data)
 
-    ortho_fit = model.fit(ortho_x, ortho_y)
-    para_fit = model.fit(para_x, para_y)
+    if os.path.exists(tmp_fname):
+        os.unlink(tmp_fname)
+    os.removedirs(tmp_dirname)
 
-    npt.assert_almost_equal(ortho_fit.params[0], 0.46438638)
-    npt.assert_almost_equal(ortho_fit.params[1], 0.13845926)
-    npt.assert_almost_equal(para_fit.params[0],  0.57456788)
-    npt.assert_almost_equal(para_fit.params[1], 0.13684096)
+def test_path_roundtrip_binary(pcd_fname):
+    import pypcd
+    pc = pypcd.PointCloud.from_path(pcd_fname)
+    md = pc.get_metadata()
+
+    tmp_dirname = tempfile.mkdtemp(suffix='_pypcd', prefix='tmp')
+
+    tmp_fname = os.path.join(tmp_dirname, 'out.pcd')
+
+    pc.save_pcd(tmp_fname, compression='binary')
+
+    assert(os.path.exists(tmp_fname))
+
+    pc2 = pypcd.PointCloud.from_path(tmp_fname)
+    md2 = pc2.get_metadata()
+    for k,v in md2.iteritems():
+        if k=='data':
+            assert v=='binary'
+        else:
+            assert v==md[k]
+
+    np.testing.assert_equal(pc.pc_data, pc2.pc_data)
+
+    if os.path.exists(tmp_fname):
+        os.unlink(tmp_fname)
+    os.removedirs(tmp_dirname)
+
+def test_path_roundtrip_binary_compressed(pcd_fname):
+    import pypcd
+    pc = pypcd.PointCloud.from_path(pcd_fname)
+    md = pc.get_metadata()
+
+    tmp_dirname = tempfile.mkdtemp(suffix='_pypcd', prefix='tmp')
+
+    tmp_fname = os.path.join(tmp_dirname, 'out.pcd')
+
+    pc.save_pcd(tmp_fname, compression='binary_compressed')
+
+    assert(os.path.exists(tmp_fname))
+
+    pc2 = pypcd.PointCloud.from_path(tmp_fname)
+    md2 = pc2.get_metadata()
+    for k,v in md2.iteritems():
+        if k=='data':
+            assert v=='binary_compressed'
+        else:
+            assert v==md[k]
+
+    np.testing.assert_equal(pc.pc_data, pc2.pc_data)
+
+    if os.path.exists(tmp_fname):
+        os.unlink(tmp_fname)
+    os.removedirs(tmp_dirname)
+
+def cat_pointclouds(pcd_fname):
+    import pypcd
+    pc = pypcd.PointCloud.from_path(pcd_fname)
+    pc2 = pc.copy()
+    pc2.pc_data['x'] += 0.1
+    pc3 = pypcd.cat_point_clouds(pc, pc2)
+    for fld, fld3 in zip(pc.fields, pc3.fields):
+        assert(fld==fld3)
+    assert(pc3.width == pc.width+pc2.width)
+
