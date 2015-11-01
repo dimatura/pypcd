@@ -17,7 +17,6 @@ import numpy as np
 import warnings
 import lzf
 
-
 HAS_SENSOR_MSGS = True
 try:
     from sensor_msgs.msg import PointField
@@ -47,8 +46,6 @@ __all__ = [\
      'save_point_cloud',
      'save_point_cloud_bin',
      'save_point_cloud_bin_compressed',
-     'pcd_type_to_pc2_type',
-     'pc2_type_to_pcd_type',
      'pcd_type_to_numpy_type',
      'numpy_type_to_pcd_type',
      ]
@@ -65,6 +62,7 @@ if HAS_SENSOR_MSGS:
                      (PointField.FLOAT64, ('F', 8))]
     pc2_type_to_pcd_type = dict(pc2_pcd_type_mappings)
     pcd_type_to_pc2_type = dict((q,p) for (p,q) in pc2_pcd_type_mappings)
+    __all__.extend(['pcd_type_to_pc2_type', 'pc2_type_to_pcd_type'])
 
 numpy_pcd_type_mappings = [\
                 (np.dtype('float32') , ('F', 4)),
