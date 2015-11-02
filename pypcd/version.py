@@ -3,8 +3,8 @@ from os.path import join as pjoin
 # Format expected by setup.py and doc/source/conf.py: string of form "X.Y.Z"
 _version_major = 0
 _version_minor = 1
-_version_micro = ''  # use '' for first of series, number for 1 and above
-_version_extra = ''  # Uncomment this for full releases
+_version_micro = 1  # use '' for first of series, number for 1 and above
+_version_extra = None  # Uncomment this for full releases
 
 # Construct full version string from these.
 _ver = [_version_major, _version_minor]
@@ -25,14 +25,15 @@ CLASSIFIERS = ["Development Status :: 3 - Alpha",
 
 # Description should be a one-liner:
 description = "Pure Python PCD reader/writer"
+
 # Long description will go up on the pypi page
-long_description = """
+long_description = """\
 pypcd
 ========
 
-Pure Python PCD reader/writer
+Pure Python reader/writer for the PCL ``pcd`` data format for point clouds.
 
-To get started using these components in your own software, please go to the repository README_.
+Please go to the repository README_.
 
 .. _README: https://github.com/dimatura/pypcd/blob/master/README.md
 
@@ -65,4 +66,4 @@ VERSION = __version__
 PACKAGES = ['pypcd',
             'pypcd.tests']
 PACKAGE_DATA = {'pypcd': [pjoin('data', '*')]}
-REQUIRES = ["numpy", "python-lzf"]
+REQUIRES = ["numpy", "lzf"]
