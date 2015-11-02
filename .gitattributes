@@ -1,0 +1,4 @@
+*.pcd filter=lfs diff=lfs merge=lfs -crlf
+*.blp filter=lfs diff=lfs merge=lfs -crlf
+*.rawblosc filter=lfs diff=lfs merge=lfs -crlf
+*.gz filter=lfs diff=lfs merge=lfs -crlf
