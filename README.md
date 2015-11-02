@@ -21,6 +21,23 @@ It parses the PCD header and loads the data (whether in `ascii`, `binary` or `bi
 class, containing the point cloud data as `pc_data`, and
 some convenience functions for I/O and metadata access.
 
+Example
+-------
+
+```python
+import pypcd
+# also can read from file handles.
+pc = pypcd.PointCloud.from_path(pcd_fname)
+# pc.pc_data has the data as a structured array
+# pc.fields, pc.count, etc have the metadata
+
+# center the x field
+pc.pc_data['x'] -= pc.pc_data['x'].mean()
+
+# save as binary compressed
+pc.save_pcd(tmp_fname, compression='binary_compressed')
+```
+
 Is it beautiful, production-ready code?
 ----------------------------------------
 No.
@@ -40,6 +57,7 @@ In no particular order,
   Requires the ROS `sensor_msgs` package with Python bindings installed.
   This functionality uses code developed by Jon Binney under
   the BSD license, included as `numpy_pc2.py`.
+
 
 What can't it do?
 -----------------
