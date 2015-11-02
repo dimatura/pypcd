@@ -94,3 +94,5 @@ Thanks! Please submit a pull request.
 I want to congratulate you / insult you
 ----------
 My email is `dimatura@cmu.edu`.
+
+Copyright (C) 2015 Dainel Maturana
