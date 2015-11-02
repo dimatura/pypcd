@@ -62,6 +62,11 @@ In no particular order,
 What can't it do?
 -----------------
 
+There's no synchronization between the metadata fields in `PointCloud`
+and the data in `pc_data`. If you change the shape of `pc_data` 
+without updating the metadata fields you'll run into trouble.
+
+
 I've only used it for unorganized point cloud data
 (in PCD conventions, `height=1`), not organized
 data like what you get from RGBD.
