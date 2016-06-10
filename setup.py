@@ -1,5 +1,5 @@
 import os
-from distutils.core import setup
+from setuptools import setup
 
 # Get version and release info, which is all stored in pypcd/version.py
 ver_file = os.path.join('pypcd', 'version.py')
