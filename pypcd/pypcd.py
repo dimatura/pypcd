@@ -719,8 +719,8 @@ class PointCloud(object):
               'fields': [],
               'size': [],
               'count': [],
-              'width': 0,
-              'height': 1,
+              'width': msg.width,
+              'height': msg.height,
               'viewpoint': [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
               'points': 0,
               'type': [],
@@ -734,8 +734,9 @@ class PointCloud(object):
             if field.count > 1:
                 warnings.warn('fields with count > 1 are not well tested')
             md['count'].append(field.count)
-        pc_data = np.squeeze(numpy_pc2.pointcloud2_to_array(msg))
-        md['width'] = len(pc_data)
+        pc_array = numpy_pc2.pointcloud2_to_array(msg)
+        pc_data = pc_array.reshape(-1)
+        md['height'], md['width'] = pc_array.shape
         md['points'] = len(pc_data)
         pc = PointCloud(md, pc_data)
         return pc
