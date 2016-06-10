@@ -66,4 +66,4 @@ VERSION = __version__
 PACKAGES = ['pypcd',
             'pypcd.tests']
 PACKAGE_DATA = {'pypcd': [pjoin('data', '*')]}
-REQUIRES = ["numpy", "lzf"]
+INSTALL_REQUIRES = ["numpy", "python-lzf"]
