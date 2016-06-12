@@ -1,3 +1,4 @@
 .*.swp
 *.pyc
 pypcd.egg-info
+build
