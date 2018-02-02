@@ -77,7 +77,7 @@ def test_parse_header():
 
 
 def test_from_path(pcd_fname):
-    import pypcd
+    from pypcd import pypcd
     pc = pypcd.PointCloud.from_path(pcd_fname)
 
     fields = 'x y z normal_x normal_y normal_z curvature boundary k vp_x vp_y vp_z principal_curvature_x principal_curvature_y principal_curvature_z pc1 pc2'.split()
@@ -88,7 +88,7 @@ def test_from_path(pcd_fname):
 
 
 def test_add_fields(pcd_fname):
-    import pypcd
+    from pypcd import pypcd
     pc = pypcd.PointCloud.from_path(pcd_fname)
 
     old_md = pc.get_metadata()
@@ -107,7 +107,7 @@ def test_add_fields(pcd_fname):
 
 
 def test_path_roundtrip_ascii(pcd_fname):
-    import pypcd
+    from pypcd import pypcd
     pc = pypcd.PointCloud.from_path(pcd_fname)
     md = pc.get_metadata()
 
@@ -131,7 +131,7 @@ def test_path_roundtrip_ascii(pcd_fname):
 
 
 def test_path_roundtrip_binary(pcd_fname):
-    import pypcd
+    from pypcd import pypcd
     pc = pypcd.PointCloud.from_path(pcd_fname)
     md = pc.get_metadata()
 
@@ -145,7 +145,7 @@ def test_path_roundtrip_binary(pcd_fname):
 
     pc2 = pypcd.PointCloud.from_path(tmp_fname)
     md2 = pc2.get_metadata()
-    for k, v in md2.iteritems():
+    for k, v in md2.items():
         if k == 'data':
             assert v == 'binary'
         else:
@@ -159,7 +159,7 @@ def test_path_roundtrip_binary(pcd_fname):
 
 
 def test_path_roundtrip_binary_compressed(pcd_fname):
-    import pypcd
+    from pypcd import pypcd
     pc = pypcd.PointCloud.from_path(pcd_fname)
     md = pc.get_metadata()
 
@@ -173,7 +173,7 @@ def test_path_roundtrip_binary_compressed(pcd_fname):
 
     pc2 = pypcd.PointCloud.from_path(tmp_fname)
     md2 = pc2.get_metadata()
-    for k, v in md2.iteritems():
+    for k, v in md2.items():
         if k == 'data':
             assert v == 'binary_compressed'
         else:
@@ -186,7 +186,7 @@ def test_path_roundtrip_binary_compressed(pcd_fname):
 
 
 def test_cat_pointclouds(pcd_fname):
-    import pypcd
+    from pypcd import pypcd
     pc = pypcd.PointCloud.from_path(pcd_fname)
     pc2 = pc.copy()
     pc2.pc_data['x'] += 0.1
@@ -196,7 +196,7 @@ def test_cat_pointclouds(pcd_fname):
     assert(pc3.width == pc.width+pc2.width)
 
 def test_ascii_bin1(ascii_pcd_fname, bin_pcd_fname):
-    import pypcd
+    from pypcd import pypcd
     apc1 = pypcd.point_cloud_from_path(ascii_pcd_fname)
     bpc1 = pypcd.point_cloud_from_path(bin_pcd_fname)
     am = cloud_centroid(apc1)
