@@ -10,7 +10,7 @@ TODO better support for rgb nonsense
 import re
 import struct
 import copy
-import cStringIO as sio
+from io import StringIO as sio
 import numpy as np
 import warnings
 import lzf
