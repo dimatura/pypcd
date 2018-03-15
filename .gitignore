@@ -2,3 +2,4 @@
 *.pyc
 pypcd.egg-info
 build
+dist

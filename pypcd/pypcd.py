@@ -10,7 +10,7 @@ TODO better support for rgb nonsense
 import re
 import struct
 import copy
-import cStringIO as sio
+from io import StringIO as sio
 import numpy as np
 import warnings
 import lzf
@@ -87,11 +87,11 @@ def parse_header(lines):
         elif key in ('fields', 'type'):
             metadata[key] = value.split()
         elif key in ('size', 'count'):
-            metadata[key] = map(int, value.split())
+            metadata[key] = list(map(int, value.split()))
         elif key in ('width', 'height', 'points'):
             metadata[key] = int(value)
         elif key == 'viewpoint':
-            metadata[key] = map(float, value.split())
+            metadata[key] = list(map(float, value.split()))
         elif key == 'data':
             metadata[key] = value.strip().lower()
         # TODO apparently count is not required?
@@ -199,9 +199,9 @@ def _build_dtype(metadata):
             fieldnames.append(f)
             typenames.append(np_type)
         else:
-            fieldnames.extend(['%s_%04d' % (f, i) for i in xrange(c)])
+            fieldnames.extend(['%s_%04d' % (f, i) for i in range(c)])
             typenames.extend([np_type]*c)
-    dtype = np.dtype(zip(fieldnames, typenames))
+    dtype = np.dtype(list(zip(fieldnames, typenames)))
     return dtype
 
 
@@ -267,6 +267,8 @@ def point_cloud_from_fileobj(f):
     header = []
     while True:
         ln = f.readline().strip()
+        if isinstance(ln, bytes):
+            ln = ln.decode('utf-8')
         header.append(ln)
         if ln.startswith('DATA'):
             metadata = parse_header(header)
@@ -309,13 +311,13 @@ def point_cloud_to_fileobj(pc, fileobj, data_compression=None):
         assert(data_compression in ('ascii', 'binary', 'binary_compressed'))
         metadata['data'] = data_compression
 
-    header = write_header(metadata)
+    header = write_header(metadata).encode('utf-8')
     fileobj.write(header)
     if metadata['data'].lower() == 'ascii':
         fmtstr = build_ascii_fmtstr(pc)
         np.savetxt(fileobj, pc.pc_data, fmt=fmtstr)
     elif metadata['data'].lower() == 'binary':
-        fileobj.write(pc.pc_data.tostring('C'))
+        fileobj.write(pc.pc_data.tostring())
     elif metadata['data'].lower() == 'binary_compressed':
         # TODO
         # a '_' field is ignored by pcl and breakes compressed point clouds.
@@ -324,9 +326,9 @@ def point_cloud_to_fileobj(pc, fileobj, data_compression=None):
         # reorder to column-by-column
         uncompressed_lst = []
         for fieldname in pc.pc_data.dtype.names:
-            column = np.ascontiguousarray(pc.pc_data[fieldname]).tostring('C')
+            column = np.ascontiguousarray(pc.pc_data[fieldname]).tostring()
             uncompressed_lst.append(column)
-        uncompressed = ''.join(uncompressed_lst)
+        uncompressed = b''.join(uncompressed_lst)
         uncompressed_size = len(uncompressed)
         # print("uncompressed_size = %r"%(uncompressed_size))
         buf = lzf.compress(uncompressed)
@@ -359,19 +361,19 @@ def point_cloud_to_buffer(pc, data_compression=None):
 def save_point_cloud(pc, fname):
     """ save pointcloud to fname in ascii format
     """
-    with open(fname, 'w') as f:
+    with open(fname, 'wb') as f:
         point_cloud_to_fileobj(pc, f, 'ascii')
 
 
 def save_point_cloud_bin(pc, fname):
     """ save pointcloud to fname in binary format
     """
-    with open(fname, 'w') as f:
+    with open(fname, 'wb') as f:
         point_cloud_to_fileobj(pc, f, 'binary')
 
 
 def save_point_cloud_bin_compressed(pc, fname):
-    with open(fname, 'w') as f:
+    with open(fname, 'wb') as f:
         point_cloud_to_fileobj(pc, f, 'binary_compressed')
 
 
@@ -461,7 +463,7 @@ def add_fields(pc, metadata, pc_data):
         else:
             fieldnames.extend(['%s_%04d' % (f, i) for i in xrange(c)])
             typenames.extend([np_type]*c)
-    dtype = zip(fieldnames, typenames)
+    dtype = list(zip(fieldnames, typenames))
     # new dtype. could be inferred?
     new_dtype = [(f, pc.pc_data.dtype[f])
                  for f in pc.pc_data.dtype.names] + dtype
@@ -631,7 +633,7 @@ class PointCloud(object):
             warnings.warn('data_compression keyword is deprecated for'
                           ' compression')
             compression = kwargs['data_compression']
-        with open(fname, 'w') as f:
+        with open(fname, 'wb') as f:
             point_cloud_to_fileobj(self, f, compression)
 
     def save_pcd_to_fileobj(self, fileobj, compression=None, **kwargs):
