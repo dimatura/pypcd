@@ -32,163 +32,165 @@ _pftype_to_size = dict([(PointField.INT8, 1),
                         (PointField.FLOAT64, 8)])
 
 
-_nea_field_dicts =[\
-{'name':'x',
- 'offset': 0,
- 'datatype': PointField.FLOAT64,
- 'count': 1
-},
-{'name':'y',
- 'offset': 8,
- 'datatype': PointField.FLOAT64,
- 'count': 1
-},
-{'name':'z',
- 'offset': 16,
- 'datatype': PointField.FLOAT64,
- 'count': 1
-},
-{'name':'x_origin',
- 'offset': 24,
- 'datatype': PointField.FLOAT64,
- 'count': 1
-},
-{'name':'y_origin',
- 'offset': 32,
- 'datatype': PointField.FLOAT64,
- 'count': 1
-},
-{'name':'z_origin',
- 'offset': 40,
- 'datatype': PointField.FLOAT64,
- 'count': 1
-},
-{'name':'range_variance',
- 'offset': 48,
- 'datatype': PointField.FLOAT32,
- 'count': 1
-},
-{'name':'x_variance',
- 'offset': 52,
- 'datatype': PointField.FLOAT32,
- 'count': 1
-},
-{'name':'y_variance',
- 'offset': 56,
- 'datatype': PointField.FLOAT32,
- 'count': 1
-},
-{'name':'z_variance',
- 'offset': 60,
- 'datatype': PointField.FLOAT32,
- 'count': 1
-},
-{'name':'reflectance',
- 'offset': 64,
- 'datatype': PointField.FLOAT32,
- 'count': 1
-},
-{'name':'time_sec',
- 'offset': 68,
- 'datatype': PointField.UINT32,
- 'count': 1
-},
-{'name':'time_nsec',
- 'offset': 72,
- 'datatype': PointField.UINT32,
- 'count': 1
-},
-{'name':'return_type',
- 'offset': 76,
- 'datatype': PointField.UINT8,
- 'count': 1
-}]
+_nea_field_dicts = [
+    {'name': 'x',
+     'offset': 0,
+     'datatype': PointField.FLOAT64,
+     'count': 1
+     },
+    {'name': 'y',
+     'offset': 8,
+     'datatype': PointField.FLOAT64,
+     'count': 1
+     },
+    {'name': 'z',
+     'offset': 16,
+     'datatype': PointField.FLOAT64,
+     'count': 1
+     },
+    {'name': 'x_origin',
+     'offset': 24,
+     'datatype': PointField.FLOAT64,
+     'count': 1
+     },
+    {'name': 'y_origin',
+     'offset': 32,
+     'datatype': PointField.FLOAT64,
+     'count': 1
+     },
+    {'name': 'z_origin',
+     'offset': 40,
+     'datatype': PointField.FLOAT64,
+     'count': 1
+     },
+    {'name': 'range_variance',
+     'offset': 48,
+     'datatype': PointField.FLOAT32,
+     'count': 1
+     },
+    {'name': 'x_variance',
+     'offset': 52,
+     'datatype': PointField.FLOAT32,
+     'count': 1
+     },
+    {'name': 'y_variance',
+     'offset': 56,
+     'datatype': PointField.FLOAT32,
+     'count': 1
+     },
+    {'name': 'z_variance',
+     'offset': 60,
+     'datatype': PointField.FLOAT32,
+     'count': 1
+     },
+    {'name': 'reflectance',
+     'offset': 64,
+     'datatype': PointField.FLOAT32,
+     'count': 1
+     },
+    {'name': 'time_sec',
+     'offset': 68,
+     'datatype': PointField.UINT32,
+     'count': 1
+     },
+    {'name': 'time_nsec',
+     'offset': 72,
+     'datatype': PointField.UINT32,
+     'count': 1
+     },
+    {'name': 'return_type',
+     'offset': 76,
+     'datatype': PointField.UINT8,
+     'count': 1
+     }]
 
-_nea_float_fields_dicts =[\
-{'name':'x',
- 'offset': 0,
- 'datatype': PointField.FLOAT32,
- 'count': 1
-},
-{'name':'y',
- 'offset': 4,
- 'datatype': PointField.FLOAT32,
- 'count': 1
-},
-{'name':'z',
- 'offset': 8,
- 'datatype': PointField.FLOAT32,
- 'count': 1
-},
-{'name':'x_origin',
- 'offset': 12,
- 'datatype': PointField.FLOAT32,
- 'count': 1
-},
-{'name':'y_origin',
- 'offset': 16,
- 'datatype': PointField.FLOAT32,
- 'count': 1
-},
-{'name':'z_origin',
- 'offset': 20,
- 'datatype': PointField.FLOAT32,
- 'count': 1
-},
-{'name':'range_variance',
- 'offset': 24,
- 'datatype': PointField.FLOAT32,
- 'count': 1
-},
-{'name':'x_variance',
- 'offset': 28,
- 'datatype': PointField.FLOAT32,
- 'count': 1
-},
-{'name':'y_variance',
- 'offset': 32,
- 'datatype': PointField.FLOAT32,
- 'count': 1
-},
-{'name':'z_variance',
- 'offset': 36,
- 'datatype': PointField.FLOAT32,
- 'count': 1
-},
-{'name':'reflectance',
- 'offset': 40,
- 'datatype': PointField.FLOAT32,
- 'count': 1
-},
-{'name':'time_sec',
- 'offset': 44,
- 'datatype': PointField.UINT32,
- 'count': 1
-},
-{'name':'time_nsec',
- 'offset': 48,
- 'datatype': PointField.UINT32,
- 'count': 1
-},
-{'name':'return_type',
- 'offset': 52,
- 'datatype': PointField.UINT8,
- 'count': 1
-}]
+_nea_float_fields_dicts = [
+                          {'name': 'x',
+                           'offset': 0,
+                           'datatype': PointField.FLOAT32,
+                           'count': 1
+                           },
+                          {'name': 'y',
+                           'offset': 4,
+                           'datatype': PointField.FLOAT32,
+                           'count': 1
+                           },
+                          {'name': 'z',
+                           'offset': 8,
+                           'datatype': PointField.FLOAT32,
+                           'count': 1
+                           },
+                          {'name': 'x_origin',
+                           'offset': 12,
+                           'datatype': PointField.FLOAT32,
+                           'count': 1
+                           },
+                          {'name': 'y_origin',
+                           'offset': 16,
+                           'datatype': PointField.FLOAT32,
+                           'count': 1
+                           },
+                          {'name': 'z_origin',
+                           'offset': 20,
+                           'datatype': PointField.FLOAT32,
+                           'count': 1
+                           },
+                          {'name': 'range_variance',
+                           'offset': 24,
+                           'datatype': PointField.FLOAT32,
+                           'count': 1
+                           },
+                          {'name': 'x_variance',
+                           'offset': 28,
+                           'datatype': PointField.FLOAT32,
+                           'count': 1
+                           },
+                          {'name': 'y_variance',
+                           'offset': 32,
+                           'datatype': PointField.FLOAT32,
+                           'count': 1
+                           },
+                          {'name': 'z_variance',
+                           'offset': 36,
+                           'datatype': PointField.FLOAT32,
+                           'count': 1
+                           },
+                          {'name': 'reflectance',
+                           'offset': 40,
+                           'datatype': PointField.FLOAT32,
+                           'count': 1
+                           },
+                          {'name': 'time_sec',
+                           'offset': 44,
+                           'datatype': PointField.UINT32,
+                           'count': 1
+                           },
+                          {'name': 'time_nsec',
+                           'offset': 48,
+                           'datatype': PointField.UINT32,
+                           'count': 1
+                           },
+                          {'name': 'return_type',
+                           'offset': 52,
+                           'datatype': PointField.UINT8,
+                           'count': 1
+                           }]
 
 
-_label_field_dict = {'name':'label',
-                    'offset':0,
-                    'datatype': PointField.UINT8,
-                    'count':1}
+_label_field_dict = {'name': 'label',
+                     'offset': 0,
+                     'datatype': PointField.UINT8,
+                     'count': 1}
+
 
 # TODO if I use '_' for padding, like pcl, there are weird
 # interactions when using binary_compressed. PCL assumes
 # padding is not included in compressed files (which makes sense).
 _padding_field_dict = {'name': '_PAD',
-                      'offset':0,
-                      'datatype': PointField.UINT8,
-                      'count': 0}
+                       'offset': 0,
+                       'datatype': PointField.UINT8,
+                       'count': 0}
+
 
 def datatype_to_size(datatype):
     """ ROS pointfield datatype to size in bytes
@@ -201,6 +203,7 @@ def datatype_to_size(datatype):
         return 4
     elif datatype in (PointField.FLOAT64,):
         return 8
+
 
 def make_nea_fields_dicts(with_label=True, with_padding=True):
     field_dicts = copy.deepcopy(_nea_field_dicts)
@@ -220,6 +223,7 @@ def make_nea_fields_dicts(with_label=True, with_padding=True):
         field_dicts.append(padding_field_dict_copy)
     return field_dicts
 
+
 def make_nea_float_fields_dicts(with_label=True, with_padding=True):
     field_dicts = copy.deepcopy(_nea_float_fields_dicts)
     if with_label:
@@ -238,41 +242,48 @@ def make_nea_float_fields_dicts(with_label=True, with_padding=True):
         field_dicts.append(padding_field_dict_copy)
     return field_dicts
 
+
 def field_dict_list_to_dtypes(field_dicts):
     dtypes = []
     for f in field_dicts:
         count = f['count']
         if count > 1:
             for c in xrange(count):
-                name = '%s_%04d'%(f['name'], c)
+                name = '%s_%04d' % (f['name'], c)
                 nptype = _pftype_to_nptype[f['datatype']]
-                dtypes.append( (name, nptype) )
+                dtypes.append((name, nptype))
         else:
             name = f['name']
             nptype = _pftype_to_nptype[f['datatype']]
-            dtypes.append( (name, nptype) )
+            dtypes.append((name, nptype))
     return dtypes
 
+
 def make_nea_dtypes(with_label=True, with_padding=True):
-    fl = make_nea_fields_dicts(with_label=with_label, with_padding=with_padding)
+    fl = make_nea_fields_dicts(with_label=with_label,
+                               with_padding=with_padding)
     return field_dict_list_to_dtypes(fl)
+
 
 def make_nea_float_dtypes(with_label=True, with_padding=True):
-    fl = make_nea_float_fields_dicts(with_label=with_label, with_padding=with_padding)
+    fl = make_nea_float_fields_dicts(with_label=with_label,
+                                     with_padding=with_padding)
     return field_dict_list_to_dtypes(fl)
 
+
 def field_dict_list_to_pcd_metadata(field_dict_list):
-    pcd_md = {'version':.7,
-              'fields':[f['name'] for f in field_dict_list],
-              'size':[ _pftype_to_size[f['datatype']] for f in field_dict_list],
-              'type':[ _pftype_to_pcd_letter[f['datatype']] for f in field_dict_list],
-              'count':[ f['count'] for f in field_dict_list ],
-              'width':0,
-              'height':1,
-              'viewpoint':[0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
-              'points':0,
-              'data':'ASCII'}
+    pcd_md = {'version': .7,
+              'fields': [f['name'] for f in field_dict_list],
+              'size': [_pftype_to_size[f['datatype']] for f in
+                       field_dict_list],
+              'type': [_pftype_to_pcd_letter[f['datatype']] for f in
+                       field_dict_list],
+              'count': [f['count'] for f in field_dict_list],
+              'width': 0,
+              'height': 1,
+              'viewpoint': [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+              'points': 0,
+              'data': 'ASCII'}
     return pcd_md
 
-#nea_fields = [ PointField(**d) for d in nea_fields_dicts]
-
+# nea_fields = [ PointField(**d) for d in nea_fields_dicts]

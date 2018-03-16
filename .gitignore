@@ -2,3 +2,5 @@
 *.pyc
 pypcd.egg-info
 build
+.eggs/
+dist
