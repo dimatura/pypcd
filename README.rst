@@ -54,6 +54,9 @@ How to install
 You may want to install optional dependencies such as `pandas <https://pandas.pydata.org>`__.
 You can also use this library with ROS ``sensor_msgs``.
 
+You can also clone this repo and use setup.py. Note that downloading data assets will
+require `git-lfs <https://git-lfs.github.com>`__.
+
 Is it beautiful, production-ready code?
 ---------------------------------------
 
