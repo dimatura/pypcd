@@ -1,5 +1,7 @@
 """
 this is just a basic sanity check, not a really legit test suite.
+
+TODO maybe download data here instead of having it in repo
 """
 
 import pytest
@@ -35,11 +37,13 @@ POINTS 19812
 DATA ascii
 """
 
+
 @pytest.fixture
 def pcd_fname():
     import pypcd
     return os.path.join(pypcd.__path__[0], 'test_data',
                         'partial_cup_model.pcd')
+
 
 @pytest.fixture
 def ascii_pcd_fname():
@@ -47,18 +51,21 @@ def ascii_pcd_fname():
     return os.path.join(pypcd.__path__[0], 'test_data',
                         'ascii.pcd')
 
+
 @pytest.fixture
 def bin_pcd_fname():
     import pypcd
     return os.path.join(pypcd.__path__[0], 'test_data',
                         'bin.pcd')
 
+
 def cloud_centroid(pc):
     xyz = np.empty((pc.points, 3), dtype=np.float)
-    xyz[:,0] = pc.pc_data['x']
-    xyz[:,1] = pc.pc_data['y']
-    xyz[:,2] = pc.pc_data['z']
+    xyz[:, 0] = pc.pc_data['x']
+    xyz[:, 1] = pc.pc_data['y']
+    xyz[:, 2] = pc.pc_data['z']
     return xyz.mean(0)
+
 
 def test_parse_header():
     from pypcd.pypcd import parse_header
@@ -195,12 +202,11 @@ def test_cat_pointclouds(pcd_fname):
         assert(fld == fld3)
     assert(pc3.width == pc.width+pc2.width)
 
+
 def test_ascii_bin1(ascii_pcd_fname, bin_pcd_fname):
     import pypcd
     apc1 = pypcd.point_cloud_from_path(ascii_pcd_fname)
     bpc1 = pypcd.point_cloud_from_path(bin_pcd_fname)
     am = cloud_centroid(apc1)
     bm = cloud_centroid(bpc1)
-    assert( np.allclose(am, bm) )
-
-
+    assert(np.allclose(am, bm))
