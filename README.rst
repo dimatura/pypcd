@@ -72,12 +72,13 @@ Using with ROS
 
 You can also use this library with ROS ``sensor_msgs``, but it is *not* a dependency.
 You don't need to install this package with catkin -- using `pip` should be fine --
-but it is possible:
+but if you want to it is possible:
 
 Steps:
 
 .. code:: bash
-
+    # you need to do this manually in this case
+    pip install python-lzf
     cd your_workspace/src
     git clone https://github.com/dimatura/pypcd
     mv setup_ros.py setup.py
