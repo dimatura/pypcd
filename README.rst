@@ -77,6 +77,7 @@ but if you want to it is possible:
 Steps:
 
 .. code:: bash
+
     # you need to do this manually in this case
     pip install python-lzf
     cd your_workspace/src
