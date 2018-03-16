@@ -75,6 +75,7 @@ You don't need to install this package with catkin -- using `pip` should be fine
 but it is possible:
 
 Steps:
+
 .. code:: bash
 
     cd your_workspace/src
