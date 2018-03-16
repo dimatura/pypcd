@@ -66,16 +66,44 @@ You can also clone this repo and use setup.py.
 Note that downloading data assets will
 require `git-lfs <https://git-lfs.github.com>`__.
 
-You can also use this library with ROS ``sensor_msgs``, but it is not a dependency.
-You don't need to install this package with catkin, but if you want to it is possible.
-Steps:
 
+Using with ROS
+---------------
+
+You can also use this library with ROS ``sensor_msgs``, but it is *not* a dependency.
+You don't need to install this package with catkin -- using `pip` should be fine --
+but it is possible:
+
+Steps:
 .. code:: bash
 
     cd your_workspace/src
     git clone https://github.com/dimatura/pypcd
     mv setup_ros.py setup.py
-    catkin build
+    catkin build pypcd
+    source ../devel/setup.bash
+
+
+Then you can do something like this:
+
+.. code:: python
+
+    import pypcd
+    import rospy
+    from sensor_msgs.msg import PointCloud2
+
+    sub = rospy.Subscriber('incloud', PointCloud2)
+    pub = rospy.Publisher('outcloud', PointCloud2, cb)
+
+    # ... in your callback for sub
+    pc = PointCloud.from_msg(msg)
+    pc.save('foo.pcd', compression='binary_compressed')
+
+    # ... maybe manipulate your pointcloud with numpy here ...
+
+    outmsg = pc.to_msg()
+    pub.publish(outmsg)
+
 
 
 Is it beautiful, production-ready code?
@@ -160,6 +188,7 @@ TODO
 - Better support for rgb nonsense
 - Export to ply?
 - Figure out if it's acceptable to use "pointcloud" as a single word.
+- Package data assets in pypi?
 
 
 Credits
