@@ -26,6 +26,8 @@ It parses the PCD header and loads the data (whether in ``ascii``,
 instance of the ``PointCloud``
 class, containing the point cloud data as ``pc_data``, and
 some convenience functions for I/O and metadata access.
+See the comments in ``pypcd.py`` for some info on the point cloud
+structure.
 
 Example
 -------
@@ -48,21 +50,33 @@ Example
 How to install
 --------------
 
-.. code::
+.. code:: bash
 
     pip install pypcd
 
-You may want to install optional dependencies such as `pandas <https://pandas.pydata.org>`__.
-You can also use this library with ROS ``sensor_msgs``.
+That's it! You may want to install optional dependencies such as `pandas
+<https://pandas.pydata.org>`__.
 
 You can also clone this repo and use setup.py. 
 
-.. code::
+.. code:: bash
 
     git clone https://github.com/dimatura/pypcd
 
 Note that downloading data assets will
 require `git-lfs <https://git-lfs.github.com>`__.
+
+You can also use this library with ROS ``sensor_msgs``, but it is not a dependency.
+You don't need to install this package with catkin, but if you want to it is possible.
+Steps:
+
+.. code:: bash
+
+    cd your_workspace/src
+    git clone https://github.com/dimatura/pypcd
+    mv setup_ros.py setup.py
+    catkin build
+
 
 Is it beautiful, production-ready code?
 ---------------------------------------
