@@ -9,7 +9,6 @@ Welcome to pypcd's documentation!
    installation
    usage
    modules
-   contributing
    history
 
 Indices and tables
