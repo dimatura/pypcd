@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>pypcd</name>
+  <version>0.1.1</version>
+  <description>
+      Read and write PCL .pcd files in python.
+  </description>
+
+  <maintainer email="dimatura@cmu.edu">Daniel Maturana</maintainer>
+  <author email="dimatura@cmu.edu">Daniel Maturana</author>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>rospy</depend>
+  <depend>sensor_msgs</depend>
+</package>
