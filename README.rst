@@ -44,6 +44,16 @@ Example
     # save as binary compressed
     pc.save_pcd('bar.pcd', compression='binary_compressed')
 
+
+How to install
+--------------
+
+.. code::
+    pip install pypcd
+
+You may want to install optional dependencies such as `pandas <https://pandas.pydata.org>`__.
+You can also use this library with ROS ``sensor_msgs``.
+
 Is it beautiful, production-ready code?
 ---------------------------------------
 
@@ -60,7 +70,7 @@ In no particular order,
    The latter requires the ``lzf`` module.
 -  Decode and encode RGB into a single ``float32`` number. If
    you don't know what I'm talking about consider yourself lucky.
--  Point clouds from and to `pandas <https://pandas.pydata.org>`__ dataframes. 
+-  Point clouds to `pandas <https://pandas.pydata.org>`__ dataframes. 
    This in particular is quite useful,
    since `pandas` is pretty powerful and makes various operations
    such as merging point clouds or manipulating values easy.
