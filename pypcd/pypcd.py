@@ -267,7 +267,7 @@ def point_cloud_from_fileobj(f):
     header = []
     while True:
         ln = f.readline().strip()
-        if isinstance(ln, bytes):
+        if not isinstance(ln, str):
             ln = ln.decode('utf-8')
         header.append(ln)
         if ln.startswith('DATA'):
