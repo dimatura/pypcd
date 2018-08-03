@@ -12,7 +12,11 @@ dimatura@cmu.edu, 2013-2018
 import re
 import struct
 import copy
-import cStringIO as sio
+import sys
+if sys.version_info[0] < 3:
+    import cStringIO as sio
+else:
+    import io as sio
 import numpy as np
 import warnings
 import lzf
@@ -91,7 +95,10 @@ def parse_header(lines):
         elif key in ('fields', 'type'):
             metadata[key] = value.split()
         elif key in ('size', 'count'):
-            metadata[key] = map(int, value.split())
+            if sys.version_info[0] < 3:
+                metadata[key] = map(int, value.split())
+            else:
+                metadata[key] = list(map(int, value.split()))
         elif key in ('width', 'height', 'points'):
             metadata[key] = int(value)
         elif key == 'viewpoint':
@@ -207,7 +214,10 @@ def _build_dtype(metadata):
         else:
             fieldnames.extend(['%s_%04d' % (f, i) for i in xrange(c)])
             typenames.extend([np_type]*c)
-    dtype = np.dtype(zip(fieldnames, typenames))
+    if sys.version_info[0] < 3:
+        dtype = np.dtype(zip(fieldnames, typenames))
+    else:
+        dtype = np.dtype(list(zip(fieldnames, typenames)))
     return dtype
 
 
@@ -278,6 +288,10 @@ def point_cloud_from_fileobj(f):
     header = []
     while True:
         ln = f.readline().strip()
+        if sys.version_info[0] < 3:
+            pass
+        else:
+            ln = ln.decode("utf-8") 
         header.append(ln)
         if ln.startswith('DATA'):
             metadata = parse_header(header)
