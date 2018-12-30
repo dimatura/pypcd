@@ -67,6 +67,7 @@ numpy_pcd_type_mappings = [(np.dtype('float32'), ('F', 4)),
                            (np.dtype('uint16'), ('U', 2)),
                            (np.dtype('uint32'), ('U', 4)),
                            (np.dtype('uint64'), ('U', 8)),
+                           (np.dtype('int8'), ('I', 1)),
                            (np.dtype('int16'), ('I', 2)),
                            (np.dtype('int32'), ('I', 4)),
                            (np.dtype('int64'), ('I', 8))]
