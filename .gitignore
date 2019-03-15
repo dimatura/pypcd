@@ -5,3 +5,10 @@ build
 .eggs/
 dist
 _build
+bin
+lib
+include
+.Python
+.idea
+pip-selfcheck.json
+.pytest_cache/ 
