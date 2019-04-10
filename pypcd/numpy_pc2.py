@@ -135,7 +135,7 @@ def pointcloud2_to_array(cloud_msg, split_rgb=False, remove_padding=True):
 
     # remove the dummy fields that were added
     if remove_padding:
-        cloud_arr=recfuncs.repack_fields(cloud_arr[
+        cloud_arr = recfuncs.repack_fields(cloud_arr[
             [fname for fname, _type in dtype_list if not (fname[:len(DUMMY_FIELD_PREFIX)] == DUMMY_FIELD_PREFIX)]])
 
     if split_rgb:
