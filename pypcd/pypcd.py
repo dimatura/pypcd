@@ -18,7 +18,7 @@ import lzf
 HAS_SENSOR_MSGS = True
 try:
     from sensor_msgs.msg import PointField
-    import numpy_pc2  # needs sensor_msgs
+    from . import numpy_pc2  # needs sensor_msgs
 except ImportError:
     HAS_SENSOR_MSGS = False
 
