@@ -322,6 +322,10 @@ def point_cloud_to_fileobj(pc, fileobj, data_compression=None):
         metadata['data'] = data_compression
 
     header = write_header(metadata)
+    
+    if data_compression == 'binary':
+        header = str.encode(header)
+        
     fileobj.write(header)
     if metadata['data'].lower() == 'ascii':
         fmtstr = build_ascii_fmtstr(pc)
@@ -378,7 +382,7 @@ def save_point_cloud(pc, fname):
 def save_point_cloud_bin(pc, fname):
     """ Save pointcloud to fname in binary format.
     """
-    with open(fname, 'w') as f:
+    with open(fname, 'wb') as f:
         point_cloud_to_fileobj(pc, f, 'binary')
 
 
@@ -604,13 +608,13 @@ def decode_rgb_from_pcl(rgb):
     return rgb_arr
 
 
-def make_xyz_label_point_cloud(xyzl, label_type='f'):
+def make_xyz_label_point_cloud(xyzl, label_type='f', label = 'label'):
     """ Make XYZL point cloud from numpy array.
 
     TODO i labels?
     """
     md = {'version': .7,
-          'fields': ['x', 'y', 'z', 'label'],
+          'fields': ['x', 'y', 'z', label],
           'count': [1, 1, 1, 1],
           'width': len(xyzl),
           'height': 1,
@@ -628,7 +632,7 @@ def make_xyz_label_point_cloud(xyzl, label_type='f'):
     # TODO use .view()
     xyzl = xyzl.astype(np.float32)
     dt = np.dtype([('x', np.float32), ('y', np.float32), ('z', np.float32),
-                   ('label', np.float32)])
+                   (label, np.float32)])
     pc_data = np.rec.fromarrays([xyzl[:, 0], xyzl[:, 1], xyzl[:, 2],
                                  xyzl[:, 3]], dtype=dt)
     pc = PointCloud(md, pc_data)
