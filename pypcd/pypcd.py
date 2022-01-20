@@ -208,7 +208,7 @@ def _build_dtype(metadata):
         else:
             fieldnames.extend(['%s_%04d' % (f, i) for i in range(c)])
             typenames.extend([np_type]*c)
-    dtype = np.dtype(x for x in zip(fieldnames, typenames))
+    dtype = np.dtype([x for x in zip(fieldnames, typenames)])
     return dtype
 
 
