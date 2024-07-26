@@ -12,7 +12,8 @@ dimatura@cmu.edu, 2013-2018
 import re
 import struct
 import copy
-from io import StringIO as sio
+from io import BytesIO as sio
+
 import numpy as np
 import warnings
 import lzf
