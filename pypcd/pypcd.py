@@ -13,6 +13,7 @@ import re
 import struct
 import copy
 from io import BytesIO as sio
+
 import numpy as np
 import warnings
 import lzf
