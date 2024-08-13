@@ -39,6 +39,7 @@ Functions for working with PointCloud2.
 __docformat__ = "restructuredtext en"
 
 import numpy as np
+import numpy.lib.recfunctions as recfuncs
 
 from sensor_msgs.msg import PointField
 from sensor_msgs.msg import PointCloud2
@@ -134,8 +135,8 @@ def pointcloud2_to_array(cloud_msg, split_rgb=False, remove_padding=True):
 
     # remove the dummy fields that were added
     if remove_padding:
-        cloud_arr = cloud_arr[
-            [fname for fname, _type in dtype_list if not (fname[:len(DUMMY_FIELD_PREFIX)] == DUMMY_FIELD_PREFIX)]]
+        cloud_arr = recfuncs.repack_fields(cloud_arr[
+            [fname for fname, _type in dtype_list if not (fname[:len(DUMMY_FIELD_PREFIX)] == DUMMY_FIELD_PREFIX)]])
 
     if split_rgb:
         cloud_arr = split_rgb_field(cloud_arr)
